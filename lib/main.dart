@@ -4,11 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:havadurumu/data_service.dart';
 import 'package:havadurumu/gunkaydet.dart';
+import 'package:havadurumu/kayitol.dart';
 import 'package:havadurumu/menu.dart';
 import 'package:havadurumu/sehir.dart';
 import 'package:havadurumu/weather_model.dart';
 import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:async';
+import 'package:fluttertoast/fluttertoast.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,14 +21,25 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(seconds: 1))
+        .then((value) => {FlutterNativeSplash.remove()});
+  }
+
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Hava Durumu',
+      title: 'Kıyava!',
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       home: GirisMenu(),
@@ -42,10 +58,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   WeatherModel? model;
   double? temp;
+  int? kiyava;
   Future<void> getData() async {
-    model = await service.getWeather("Eskisehir");
+    model =
+        await service.getWeather("$newCity"); //burdan şehri değiştirebilirsin.
     temp = model!.main!.temp;
+    int kiyava = temp!.toInt();
     print(temp);
+    print(kiyava);
   }
 
   @override
@@ -59,14 +79,15 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> ruzgar = ["21", "26", "43"];
   List<String> derece = ["23", "36", "11"];
   List<String> tarih = ["02.04.2022", "03.04.2022", "04.04.2022"];
-  List<String> giysi1 = ['Tişört', 'Elbise', 'Kazak', 'Gömlek'];
+  List<String> hava1 = ['Seçiniz', 'Güneşli', 'Bulutlu', 'Yağmurlu', 'Karlı'];
+  Object? secim = 'Seçiniz';
+  List<String> giysi1 = ['Tişört', 'Elbise', 'Kazak', 'Mont'];
   Object? secim1 = 'Tişört';
-  List<String> giysi2 = ['Tişört', 'Elbise', 'Kazak', 'Gömlek'];
-  Object? secim2 = 'Tişört';
-  List<String> giysi3 = ['Tişört', 'Elbise', 'Kazak', 'Gömlek'];
-  Object? secim3 = 'Tişört';
-  String anlikDerece = "29";
-  String sehir = "Eskisehir";
+  List<String> giysi2 = ['Tişört', 'Elbise', 'Kazak', 'Mont'];
+  Object? secim2 = 'Kazak';
+  List<String> giysi3 = ['Tişört', 'Elbise', 'Kazak', 'Mont'];
+  Object? secim3 = 'Mont';
+  String sehir = newCity.toString();
   Color renk1 = Colors.white;
   Color renk2 = Colors.orange;
 
@@ -77,11 +98,20 @@ class _MyHomePageState extends State<MyHomePage> {
         leading: Icon(Icons.person_search),
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => const GirisMenu(),
+            builder: (context) => GirisMenu(),
           ));
         },
       );
     });
+  }
+
+  final Uri url = Uri.parse(
+      'https://play.google.com/store/apps/dev?id=6025433514217852795');
+
+  Future<void> launchUrlWeb() async {
+    if (!await launchUrl(url)) {
+      throw 'Could not launch $url';
+    }
   }
 
   @override
@@ -90,20 +120,17 @@ class _MyHomePageState extends State<MyHomePage> {
       resizeToAvoidBottomInset: false,
       appBar: NewGradientAppBar(
         elevation: 0,
-        // leading: IconButton(
-        //   onPressed: () {
-        //     Navigator.of(context).push(MaterialPageRoute(
-        //       builder: (context) => const MenuPage(),
-        //     )
-        //     );
-        //   },
-        //   color: Colors.white,
-        //   icon: Icon(Icons.menu),
-        // ),
         centerTitle: true,
-        title: Text('Hava Durumu'),
+        title: Text(
+          'KIYAVA',
+          style: GoogleFonts.dosis(
+              color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         gradient: LinearGradient(
-          colors: [Colors.orange, Colors.red],
+          colors: [
+            Colors.cyan,
+            Colors.indigo,
+          ],
         ),
       ),
       body: FutureBuilder(
@@ -120,7 +147,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   gradient: LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
-                      colors: [Colors.orange, Colors.red])),
+                      colors: [
+                    Colors.cyan,
+                    Colors.indigo,
+                  ])),
               child: ListView.builder(
                 itemCount: 1,
                 itemBuilder: (context, index) => Padding(
@@ -132,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     children: <Widget>[
                       Icon(
                         temp != null
-                            ? (temp! <= 30)
+                            ? (temp! <= 12)
                                 ? Icons.cloud
                                 : Icons.sunny
                             : Icons.cloudy_snowing,
@@ -156,22 +186,29 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                         ],
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 30,
-                            color: Colors.white,
-                          ),
-                          Text(
-                            "$sehir",
-                            style: GoogleFonts.dosis(
-                                fontSize: 30,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => SehirPage(),
+                          ));
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              size: 30,
+                              color: Colors.white,
+                            ),
+                            Text(
+                              "$sehir",
+                              style: GoogleFonts.dosis(
+                                  fontSize: 30,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
                       ),
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.05,
@@ -187,7 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [renk1, Colors.orange],
+                            colors: [renk1, Colors.blue],
                           ),
                         ),
                         height: MediaQuery.of(context).size.height * 0.60,
@@ -206,7 +243,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                   width:
                                       MediaQuery.of(context).size.width * 0.02,
                                 ),
-                                Text("Günün Önerisi : $secim1",
+                                Text(
+                                    temp != null
+                                        ? (temp! <= 12)
+                                            ? "Günün Önerisi : " "$secim3"
+                                            : "Günün Önerisi : " "$secim1"
+                                        : "Günün Önerisi : " "$secim2",
                                     style: GoogleFonts.dosis(
                                         fontSize: 30,
                                         fontWeight: FontWeight.bold)),
@@ -220,115 +262,17 @@ class _MyHomePageState extends State<MyHomePage> {
                               height: MediaQuery.of(context).size.height * 0.02,
                             ),
                             Text(
-                              "Merhaba , $sehir'de Hava ${temp}° dereceyi gösteriyor. Bugün ki hava değerlerine en yakın günü ${tarih[0]} tarihinde, ${giysi1[0]} giyerek değerlendirmişsin. Geçmiş tercihlerine ve hava tahminlerine bakarsak, bugün de $secim1 giymeni önerebilirim.",
+                              temp != null
+                                  ? (temp! <= 12)
+                                      ? "Merhaba, $sehir'de Hava ${temp}° dereceyi gösteriyor. Geçmiş tercihlerine ve hava tahminlerine bakarsak, bugün de $secim3 giymeni önerebilirim."
+                                      : "Merhaba, $sehir'de Hava ${temp}° dereceyi gösteriyor. Geçmiş tercihlerine ve hava tahminlerine bakarsak, bugün de $secim1 giymeni önerebilirim."
+                                  : "Merhaba, $sehir'de Hava ${temp}° dereceyi gösteriyor. Geçmiş tercihlerine ve hava tahminlerine bakarsak, bugün de $secim2 giymeni önerebilirim.",
                               style: GoogleFonts.dosis(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
                       ),
-
-                      /*SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.06,
-                    ),
-                    Expanded(
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: tarih.length,
-                        separatorBuilder: (BuildContext context, int index) =>
-                            const Padding(padding: EdgeInsets.all(0)),
-                        itemBuilder: (context, index) => Container(
-                          margin: EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20.0),
-                            color: Colors.white,
-                          ),
-                          height: 120,
-                          width: 150,
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                height: MediaQuery.of(context).size.height * 0.02,
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                  color: Colors.yellow[colorCodes[index]],
-                                ),
-                                height: 100,
-                                width: 120,
-                                child: Icon(
-                                  Icons.sunny,
-                                  color: Colors.white,
-                                  size: 80,
-                                ),
-                              ),
-                              SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.004,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.wind_power,
-                                    color: Colors.grey,
-                                  ),
-                                  Text(
-                                    ruzgar[index] + " km/s",
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const Icon(
-                                    Icons.thermostat,
-                                    color: Colors.red,
-                                  ),
-                                  Text(
-                                    derece[index] + "°",
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.calendar_month,
-                                    color: Colors.brown[600],
-                                  ),
-                                  Text(
-                                    tarih[index],
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              Container(
-                                width: MediaQuery.of(context).size.width * 0.22,
-                                height: MediaQuery.of(context).size.height * 0.05,
-                                child: DropdownButtonFormField(
-                                  elevation: 0,
-                                  value: secim1,
-                                  items: giysi1
-                                      .map((item) => DropdownMenuItem<String>(
-                                          value: item, child: Text(item)))
-                                      .toList(),
-                                  onChanged: (item) =>
-                                      setState(() => secim1 = item),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.06,
-                    ),*/
                     ],
                   ),
                 ),
@@ -343,7 +287,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             UserAccountsDrawerHeader(
               accountName: const Text(
-                "Emre Kaptan",
+                "Hoşgeldin!",
                 style: TextStyle(
                   color: Colors.white,
                   shadows: <Shadow>[
@@ -355,7 +299,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               accountEmail: const Text(
-                "emrekaptan@piton.com.tr",
+                "misafir",
                 style: TextStyle(
                   color: Colors.white,
                   shadows: <Shadow>[
@@ -368,16 +312,23 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               currentAccountPicture: CircleAvatar(
                 child: ClipOval(
-                  child: Image.network(
-                    "https://yt3.ggpht.com/9y_H2GuDbYFxNUXkkPrBB0V7OH40Sz7kyV_oT9la9idIJbi_Mz9XCWk90-Gphj5zdFAU15h5qw=s176-c-k-c0x00ffffff-no-rj-mo",
-                    fit: BoxFit.fill,
+                  child: Container(
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(
+                            'assets/images/kiyavaLogo.png'), // Background Image
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                 ),
               ),
               decoration: const BoxDecoration(
                   image: DecorationImage(
                 image: NetworkImage(
-                    "https://www.formsante.com.tr/wp-content/uploads/2020/12/wsi-imageoptim-iStock-485289973-e1602246810898-1200x675.jpg"),
+                    "https://spaceplace.nasa.gov/blue-sky/en/bluesky.en.png"),
                 fit: BoxFit.cover,
               )),
             ),
@@ -401,9 +352,40 @@ class _MyHomePageState extends State<MyHomePage> {
               title: const Text('Günü Kaydet'),
               leading: Icon(Icons.save),
               onTap: () {
+                /*
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => GunKaydet(),
-                ));
+                ));*/
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text("Kıyava"),
+                        content: Text("Yakında..."),
+                        titleTextStyle: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                            fontSize: 20),
+                        actionsOverflowButtonSpacing: 20,
+                        actions: [
+                          ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text("Tamam")),
+                        ],
+                        shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(20))),
+                      );
+                    });
+              },
+            ),
+            ListTile(
+              title: const Text('Bizi Puanla'),
+              leading: Icon(Icons.star_rate_rounded),
+              onTap: () {
+                launchUrlWeb();
               },
             ),
             ListTile(
@@ -412,7 +394,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onTap: () async {
                 await FirebaseAuth.instance.signOut();
                 Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const GirisMenu(),
+                  builder: (context) => GirisMenu(),
                 ));
               },
             ),

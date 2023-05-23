@@ -1,18 +1,56 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:havadurumu/auth.dart';
 import 'package:havadurumu/kayitol.dart';
 import 'package:havadurumu/main.dart';
 import 'package:flutter/material.dart';
 import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 final TextEditingController mevcutEposta = TextEditingController();
 final TextEditingController mevcutSifre = TextEditingController();
 
 AuthService _authService = AuthService();
 
-class GirisMenu extends StatelessWidget {
-  const GirisMenu({Key? key}) : super(key: key);
+class GirisMenu extends StatefulWidget {
+  GirisMenu({Key? key}) : super(key: key);
 
+  @override
+  State<GirisMenu> createState() => _GirisMenuState();
+}
+
+class _GirisMenuState extends State<GirisMenu> {
+  late StreamSubscription subscription;
+
+  bool isDeviceConnected = false;
+  bool isAlertSet = false;
+/*
+  @override
+  void initState() {
+    getConnectivity();
+    super.initState();
+  }
+
+  getConnectivity() =>
+      subscription = Connectivity().onConnectivityChanged.listen(
+        (ConnectivityResult result) async {
+          isDeviceConnected = await InternetConnectionChecker().hasConnection;
+          if (!isDeviceConnected && isAlertSet == false) {
+            showDialogBox();
+            setState(() => isAlertSet = true);
+          }
+        },
+      );
+
+  @override
+  void dispose() {
+    subscription.cancel();
+    super.dispose();
+  }
+*/
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +58,11 @@ class GirisMenu extends StatelessWidget {
       appBar: NewGradientAppBar(
         elevation: 0,
         centerTitle: true,
-        title: Text("Oturum Aç"),
+        title: Text(
+          "EmrApp",
+          style: GoogleFonts.orbitron(
+              color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         gradient: LinearGradient(
           colors: [
             Colors.cyan,
@@ -51,8 +93,6 @@ class GirisMenu extends StatelessWidget {
                   ),
                   Container(
                     padding: const EdgeInsets.all(20.0),
-                    // width: MediaQuery.of(context).size.width * 0.8,
-                    // height: MediaQuery.of(context).size.height * 0.6,
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20.0),
                         gradient: LinearGradient(
@@ -64,7 +104,7 @@ class GirisMenu extends StatelessWidget {
                             ])),
                     child: Column(
                       children: [
-                        GestureDetector(
+                        /*GestureDetector(
                           onTap: () {
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) => const MyHomePage()));
@@ -76,14 +116,31 @@ class GirisMenu extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "HAVA DURUMU",
+                          "KIYAVA!",
                           style: GoogleFonts.acme(
                               fontSize: 40,
                               color: Colors.black,
                               fontWeight: FontWeight.bold),
+                        ),*/
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const MyHomePage()));
+                          },
+                          child: Container(
+                            width: 150,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage(
+                                    'assets/images/kiyavaLogo.png'), // Background Image
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
                         ),
                         SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.008,
+                          height: MediaQuery.of(context).size.height * 0.01,
                         ),
                         Container(
                           decoration: BoxDecoration(
@@ -91,7 +148,7 @@ class GirisMenu extends StatelessWidget {
                           ),
                           padding: const EdgeInsets.all(5.0),
                           child: SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.5,
+                            width: MediaQuery.of(context).size.width * 0.7,
                             child: TextField(
                               controller: mevcutEposta,
                               decoration: const InputDecoration(
@@ -105,7 +162,7 @@ class GirisMenu extends StatelessWidget {
                           height: MediaQuery.of(context).size.height * 0.001,
                         ),
                         SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.5,
+                          width: MediaQuery.of(context).size.width * 0.7,
                           child: TextField(
                             controller: mevcutSifre,
                             obscureText: true,
@@ -224,8 +281,7 @@ class GirisMenu extends StatelessWidget {
                               _authService.SignIn(
                                   mevcutEposta.text, mevcutSifre.text);
 
-                              if (_authService.id != null &&
-                                  _authService.giris == true) {
+                              if (_authService.id != null) {
                                 Navigator.of(context).push(MaterialPageRoute(
                                     builder: (context) => const MyHomePage()));
                               }
@@ -315,4 +371,27 @@ class GirisMenu extends StatelessWidget {
       ),
     );
   }
+/*
+  showDialogBox() => showCupertinoDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Bağlantı yok!'),
+          content: const Text('Lütfen internet bağlantınızı kontrol edin.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context, "Cancel");
+                setState(() => isAlertSet = true);
+                isDeviceConnected =
+                    await InternetConnectionChecker().hasConnection;
+                if (isDeviceConnected) {
+                  showDialogBox();
+                  setState(() => isAlertSet = false);
+                }
+              },
+              child: const Text('Tamam'),
+            ),
+          ],
+        ),
+      );*/
 }

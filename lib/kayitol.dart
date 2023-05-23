@@ -26,7 +26,11 @@ class _KayitOLState extends State<KayitOL> {
       appBar: NewGradientAppBar(
         elevation: 0,
         centerTitle: true,
-        title: Text("Kayıt Ol"),
+        title: Text(
+          "EmrApp",
+          style: GoogleFonts.orbitron(
+              color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         gradient: LinearGradient(
           colors: [
             Colors.cyan,
@@ -65,9 +69,6 @@ class _KayitOLState extends State<KayitOL> {
                       width: MediaQuery.of(context).size.width * 0.6,
                       padding: const EdgeInsets.all(10),
                       child: TextField(
-                        onChanged: (String idTutucu) {
-                          kullaniciAl(yeniKullanici.text);
-                        },
                         controller: yeniKullanici,
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
@@ -283,8 +284,7 @@ class _KayitOLState extends State<KayitOL> {
                                           onPressed: () {
                                             Navigator.of(context)
                                                 .push(MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const GirisMenu(),
+                                              builder: (context) => GirisMenu(),
                                             ));
                                           },
                                           child: Text("Tamam")),
@@ -364,6 +364,4 @@ class _KayitOLState extends State<KayitOL> {
       ),
     );
   }
-
-  void kullaniciAl(String text) {}
 }

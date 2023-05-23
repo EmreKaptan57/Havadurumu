@@ -261,7 +261,7 @@ class _GunKaydetState extends State<GunKaydet> {
                                       ),
                                     )))
                                 .toList(),
-                            onChanged: (item) => setState(() => secim1 = item),
+                            onChanged: (item) => setState(() => secim = item),
                           ),
                         ),
                       ],
@@ -415,6 +415,8 @@ class _GunKaydetState extends State<GunKaydet> {
           ),
         ),
       ),
+
+      /*
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -497,7 +499,7 @@ class _GunKaydetState extends State<GunKaydet> {
             ),
           ],
         ),
-      ),
+      ),*/
     );
   }
 }
